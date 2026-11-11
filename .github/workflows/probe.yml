@@ -1,0 +1,57 @@
+name: 数据源探针
+
+# 目的：验证「从 GitHub runner 的出口 IP 出发，15 个源还能不能采到数据」。
+# 只读、不落库、不落 raw、不改任何文件。用来决定采集能否迁到 Actions。
+# 手动触发，不要设 schedule。
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: '只测指定源（逗号分隔，留空=全部）'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  TZ: Asia/Shanghai
+  PYTHONIOENCODING: utf-8
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 出口 IP 与环境
+        run: |
+          echo "runner: $RUNNER_OS / $RUNNER_ARCH"
+          curl -s -m 10 https://ipinfo.io/json || echo "ipinfo 取不到"
+
+      - name: 跑探针
+        run: |
+          if [ -n "${{ inputs.only }}" ]; then
+            python3 tools/probe.py --only "${{ inputs.only }}" --json probe-result.json
+          else
+            python3 tools/probe.py --json probe-result.json
+          fi
+
+      - name: 上传结构化结果
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe-result
+          path: probe-result.json
+          if-no-files-found: warn
+          retention-days: 7
