@@ -1,0 +1,40 @@
+# ===== 敏感凭证 / 登录态（严禁入库）=====
+config/douyin_cookies.json
+config/*cookie*
+config/_dbg_*
+config/login_qr*.png
+config/login_qr_fresh.png
+config/qr_*.png
+config/dbg_*.png
+config/login_status.json
+config/_verify_*.txt
+config/_verify_*.json
+config/_last_qr_path.txt
+config/browser_profile/
+config/README_抖音cookie.md
+
+# ===== 已停用的模拟登录链路 =====
+tools/_deprecated/
+
+# ===== 原始采集明细（体积大，本地保留但不进版本库）=====
+**/raw/*.json
+
+# ===== 运行产物 =====
+logs/
+*.log
+__pycache__/
+*.pyc
+*.db-shm
+*.db-wal
+*.db-journal
+
+# ===== 业务数据库（体积大且含本地数据，本地保留但不进版本库）=====
+*.db
+state.db
+08_数据库备份/
+
+# ===== 生成产物 / 截图（非源码，本地留档即可）=====
+*.png
+创作者情报看板.html
+
+# ===== 说明：schema 以 .sql 入库，数据库本身不入库，克隆后由 collector 重建 =====

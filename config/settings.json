@@ -1,0 +1,117 @@
+{
+  "_comment": "创作者情报工作站 V1.0 采集配置（第二轮优化）。仅启用免登录、公开可访问的数据源；严禁填入任何登录态/签名/反爬相关参数。",
+  "_schedule": "cron 每 2 分钟触发一轮。每个源有独立 min_interval_seconds：快线 120s / 慢线 300s / 搜索 600s / 日更 3600s；未到间隔的源写 scheduled_skip 审计记录后跳过。改这里即可调频率，不用改代码。",
+  "_retention": "历史时序明细按天滚动清理，只删 trends/snapshots/runs，不删主表与派生结论，避免高频采集把数据库撑爆。",
+  "interval_seconds": 120,
+  "request": {
+    "timeout": 12,
+    "retries": 3,
+    "min_gap_per_host": 1.0
+  },
+  "retention": {
+    "trends_days": 7,
+    "snapshots_days": 30,
+    "runs_days": 30,
+    "keyword_days": 90
+  },
+  "sources": {
+    "douyin_hot": {
+      "enabled": true,
+      "label": "抖音官方热点榜",
+      "tier": "快线",
+      "min_interval_seconds": 120
+    },
+    "douyin_ies": {
+      "enabled": true,
+      "label": "抖音热点榜(官方镜像校验)",
+      "tier": "快线",
+      "min_interval_seconds": 120
+    },
+    "weibo_hot": {
+      "enabled": true,
+      "label": "微博热搜",
+      "tier": "快线",
+      "min_interval_seconds": 120
+    },
+    "baidu_hot": {
+      "enabled": true,
+      "label": "百度实时热搜",
+      "tier": "快线",
+      "min_interval_seconds": 120
+    },
+    "toutiao_hot": {
+      "enabled": true,
+      "label": "今日头条热榜",
+      "tier": "快线",
+      "min_interval_seconds": 120,
+      "limit": 50
+    },
+    "netease_hot": {
+      "enabled": true,
+      "label": "网易热点新闻",
+      "tier": "快线",
+      "min_interval_seconds": 120,
+      "limit": 50
+    },
+    "zhihu_search": {
+      "enabled": true,
+      "label": "知乎热搜词",
+      "tier": "快线",
+      "min_interval_seconds": 120
+    },
+    "bili_square": {
+      "enabled": true,
+      "label": "B站热搜词",
+      "tier": "快线",
+      "min_interval_seconds": 120
+    },
+    "bili_rank": {
+      "enabled": true,
+      "label": "B站全站排行榜",
+      "tier": "慢线",
+      "min_interval_seconds": 300
+    },
+    "bili_popular": {
+      "enabled": true,
+      "label": "B站热门",
+      "tier": "慢线",
+      "min_interval_seconds": 300,
+      "pages": 3
+    },
+    "bili_search": {
+      "enabled": true,
+      "label": "B站关键词搜索(增强)",
+      "tier": "慢线",
+      "min_interval_seconds": 600,
+      "max_keywords": 3,
+      "keywords": [],
+      "per_keyword_sleep": 3
+    },
+    "bili_rank_vertical": {
+      "enabled": true,
+      "label": "B站分区排行榜",
+      "tier": "慢线",
+      "min_interval_seconds": 300,
+      "per_rid_limit": 20
+    },
+    "baidu_vertical": {
+      "enabled": true,
+      "label": "百度垂直分榜",
+      "tier": "日更",
+      "min_interval_seconds": 3600,
+      "per_tab_limit": 30,
+      "tabs": ["novel", "movie", "teleplay", "game", "finance", "car", "travel", "technology"]
+    },
+    "bili_precious": {
+      "enabled": true,
+      "label": "B站入站必刷",
+      "tier": "日更",
+      "min_interval_seconds": 3600,
+      "limit": 60
+    }
+  },
+  "derive": {
+    "content_analysis": true,
+    "topic_opportunities": true
+  }
+}

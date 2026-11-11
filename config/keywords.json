@@ -1,0 +1,29 @@
+{
+  "_comment": "关注词（赛道词）。每轮自动对四平台热榜做包含匹配，命中情况写入 keyword_snapshots 形成时间序列。可自由增删；命中 0 也会记录，保证时序完整。",
+  "keywords": [
+    {"keyword": "AI", "category": "科技"},
+    {"keyword": "人工智能", "category": "科技"},
+    {"keyword": "科技", "category": "科技"},
+    {"keyword": "数码", "category": "科技"},
+    {"keyword": "手机", "category": "科技"},
+    {"keyword": "游戏", "category": "游戏"},
+    {"keyword": "电竞", "category": "游戏"},
+    {"keyword": "电影", "category": "影视"},
+    {"keyword": "电影节", "category": "影视"},
+    {"keyword": "综艺", "category": "影视"},
+    {"keyword": "职场", "category": "职场"},
+    {"keyword": "就业", "category": "职场"},
+    {"keyword": "副业", "category": "职场"},
+    {"keyword": "财经", "category": "财经"},
+    {"keyword": "经济", "category": "财经"},
+    {"keyword": "消费", "category": "财经"},
+    {"keyword": "健康", "category": "生活"},
+    {"keyword": "健身", "category": "生活"},
+    {"keyword": "美食", "category": "生活"},
+    {"keyword": "旅行", "category": "生活"},
+    {"keyword": "教育", "category": "教育"},
+    {"keyword": "育儿", "category": "教育"},
+    {"keyword": "情绪", "category": "心理"},
+    {"keyword": "成长", "category": "心理"}
+  ]
+}
