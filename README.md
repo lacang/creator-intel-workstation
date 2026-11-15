@@ -20,6 +20,21 @@ python3 tools/dashboard.py --export    # 导离线快照 创作者情报看板.h
 
 首次运行会自动建库（`database/workstation.db`，WAL 模式，12 表 13 索引），无需手工执行 `schema.sql`。
 
+### 首次运行的顺序（照这个来）
+
+```bash
+# 1) 先建库：空库环境下必须从采集入口进，schema.sql 由它执行
+python3 tools/collector.py --once
+
+# 2) 再自检
+python3 tools/verify.py     # → logs/quality.json
+python3 tools/audit.py      # 依赖上一步，否则「质量自检」项会是 FAIL
+```
+
+**为什么强调顺序**：`audit.py` 的 F 组读 `logs/quality.json`，没跑过 `verify.py` 时该项必然 `FAIL(score=None)`——这不是数据问题，是少跑了一步。`audit.py` 在表还没建时会直接提示该跑什么命令，不再崩栈。
+
+`tools/maintain.py`（生产入口）**自己也能建库**，空库第一次调用会正常走完 采集→建库→自检→导快照→起服务。如果只部署定时任务、不做上面两步手工验证，它一样能从零起来。
+
 ## 目录
 
 ```
