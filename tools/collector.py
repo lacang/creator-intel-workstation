@@ -52,6 +52,7 @@ requests.packages.urllib3.disable_warnings()
 # ---------------------------------------------------------------- 路径与常量
 ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "database" / "workstation.db"
+SCHEMA_PATH = ROOT / "database" / "schema.sql"
 SETTINGS_PATH = ROOT / "config" / "settings.json"
 LOG_DIR = ROOT / "logs"
 TZ = timezone(timedelta(hours=8))
@@ -519,6 +520,28 @@ def connect() -> sqlite3.Connection:
 
 
 KEYWORDS_PATH = ROOT / "config" / "keywords.json"
+
+
+def ensure_base_schema(conn) -> None:
+    """首次运行建库：基础表缺失时执行 database/schema.sql。
+
+    README 承诺「首次运行会自动建库，无需手工执行 schema.sql」，但原先只有
+    ensure_extra_tables()（建 3 张扩展表 + ALTER trends），基础 9 表无人创建，
+    于是新机器上第一轮采集会炸在 `no such table: trends`。
+
+    schema.sql 用的是不带 IF NOT EXISTS 的 CREATE TABLE，所以必须先判空库再执行——
+    重复 executescript 会直接报 table already exists。
+    """
+    if not SCHEMA_PATH.exists():
+        log.warning(f"schema.sql 不存在，跳过建库：{SCHEMA_PATH}")
+        return
+    have = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='creators'").fetchone()
+    if have:
+        return
+    conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+    conn.commit()
+    log.info("首次运行：已按 database/schema.sql 建库（9 表 + 索引）")
 
 
 def ensure_extra_tables(conn):
@@ -997,6 +1020,7 @@ def run_once(cfg: dict | None = None, http: Http | None = None) -> dict:
                         rq.get("min_gap_per_host", 1.0))
     round_ts = iso()
     conn = connect()
+    ensure_base_schema(conn)
     ensure_extra_tables(conn)
     summary = {"round_at": round_ts, "sources": [], "totals": {}}
     seed: list[str] = []
