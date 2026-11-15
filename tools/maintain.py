@@ -47,10 +47,18 @@ WEB_PORT = 8765
 
 
 def last_run():
+    """返回上一轮采集时间；库还不存在（新机器首次运行）时返回 None。
+
+    原先这里直接查 collection_runs：空库会抛 OperationalError，被 main() 的
+    try/except 捕获后只记一条 collect:ERROR，**run_once() 根本没机会执行**，
+    于是建库永远等不到，形成死锁。表现为「维护每轮都 ERROR，库一直是 0 张表」。
+    """
     c = sqlite3.connect(DB)
     try:
         r = c.execute("SELECT MAX(run_at) FROM collection_runs").fetchone()
         return r[0] if r else None
+    except sqlite3.OperationalError:
+        return None
     finally:
         c.close()
 
@@ -313,8 +321,8 @@ def main():
     except Exception:
         pass
 
-    msg = "%s | %s | 轮次=%d 空窗=%d 健康=%s" % (
-        now, " | ".join(actions), h.get("rounds", 0),
+    msg = "%s | %s | 轮次=%s 空窗=%d 健康=%s" % (
+        now, " | ".join(actions), h.get("rounds") if h.get("rounds") is not None else "未知",
         len(h.get("gaps", [])), h.get("healthy"))
     print(msg, flush=True)
 
