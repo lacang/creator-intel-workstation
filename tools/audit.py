@@ -59,6 +59,13 @@ def main():
         f"应有 {len(EXPECTED_TABLES)} 张表，实有 {len(tables & EXPECTED_TABLES)} 张",
         {"missing": sorted(missing)})
 
+    if missing:
+        print(f"库还没建好：缺 {len(missing)} 张表 {sorted(missing)}")
+        print("先跑一轮采集自动建库，再回来跑审计：")
+        print("    python3 tools/collector.py --once")
+        print("    python3 tools/audit.py")
+        raise SystemExit(1)
+
     fk = c.execute("PRAGMA foreign_key_check").fetchall()
     add("A 数据完整性", "外键完整", "PASS" if not fk else "FAIL",
         f"外键违规 {len(fk)} 条")
